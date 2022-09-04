@@ -1,0 +1,39 @@
+version: "3"
+
+services:
+  guacd:
+    container_name: my-guacd
+    image: guacamole/guacd
+    restart: always
+
+  guacamole_db:
+    container_name: my-guacamole-db
+    image: mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: mysql_password_need_change
+      MYSQL_DATABASE: guacamole_db
+      MYSQL_USER: guacamole_user
+      MYSQL_PASSWORD: mysql_password_need_change
+    volumes:
+      - ./dbdata:/var/lib/mysql
+      - ./dbinit:/docker-entrypoint-initdb.d
+
+  guacamole:
+    container_name: my-guacamole
+    image: guacamole/guacamole
+    restart: always
+    environment:
+      GUACD_HOSTNAME: my-guacd
+      MYSQL_HOSTNAME: my-guacamole-db
+      MYSQL_DATABASE: guacamole_db
+      MYSQL_USER: guacamole_user
+      MYSQL_PASSWORD: mysql_password_need_change
+      GUACAMOLE_HOME: /guacamole-home
+    volumes:
+      - ./home:/guacamole-home
+    depends_on:
+      - guacamole_db
+      - guacd
+    ports:
+      - "8080:8080"
