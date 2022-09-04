@@ -1,0 +1,53 @@
+- name: setup jump server
+  hosts: jump_server
+  become: true
+  tasks:
+    - name: get os name
+      command: uname -s
+      register: uname_s
+    - name: get machine name
+      command: uname -m
+      register: uname_m
+    - name: get docker
+      get_url:
+        url: https://get.docker.com
+        dest: ~/get-docker.sh
+    - name: execute get docker
+      command: /bin/bash ~/get-docker.sh
+    - name: get docker-compose
+      get_url:
+        url: "https://github.com/docker/compose/releases/download/1.25.4/docker-compose-{{ uname_s.stdout }}-{{ uname_m.stdout }}"
+        dest: /usr/local/bin/docker-compose
+        mode: "+x"
+    - name: make directory dbdata
+      file:
+        path: ~/dbdata
+        state: directory
+    - name: make directory dbinit
+      file:
+        path: ~/dbinit
+        state: directory
+    - name: make directory home/extensions
+      file:
+        path: ~/home/extensions
+        state: directory
+    - name: get and unarchive guacamole totp extension
+      unarchive:
+        src: https://apache.org/dyn/closer.lua/guacamole/1.4.0/binary/guacamole-auth-totp-1.4.0.tar.gz?action=download
+        dest: ~/
+        remote_src: yes
+    - name: copy guacamole totp extension
+      copy:
+        src: ~/guacamole-auth-totp-1.4.0/guacamole-auth-totp-1.4.0.jar
+        dest: ~/home/extensions
+        remote_src: yes
+    - name: copy guacamole docker-compose.yml
+      copy:
+        src: ./guacamole/docker-compose.yml
+        dest: ~/
+    - name: guacamole docker run
+      shell:
+        cmd: '/usr/bin/docker run --rm guacamole/guacamole /opt/guacamole/bin/initdb.sh --mysql > ~/dbinit/initdb.sql'
+    - name: guacamole docker-compose up -d
+      shell:
+        cmd: 'cd ~;/usr/local/bin/docker-compose down;/usr/local/bin/docker-compose up -d'
