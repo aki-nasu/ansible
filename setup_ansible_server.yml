@@ -1,5 +1,5 @@
-- name: setup jump server
-  hosts: jump_server
+- name: setup guacamole server
+  hosts: guacamole_server
   become: true
   tasks:
     - name: get os name
