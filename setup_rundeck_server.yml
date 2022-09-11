@@ -1,0 +1,26 @@
+- name: rundeck
+  hosts: rundeck_server
+  become: true
+  tasks:
+    - name: install openjdk
+      apt:
+        name: openjdk-11-jre-headless
+        update_cache: yes
+    - name: pre1-1
+      get_url:
+        url: https://raw.githubusercontent.com/rundeck/packaging/main/scripts/deb-setup.sh
+        dest: ~/
+    - name: pre1-2
+      shell: /bin/bash ~/deb-setup.sh rundeck
+    - name: pre1-3
+      shell:
+        curl -L https://packages.rundeck.com/pagerduty/rundeck/gpgkey | sudo apt-key add -
+    - name: install rundeck
+      apt:
+        name: rundeck
+        update_cache: yes
+    - name: rundeck service start
+      systemd:
+        name: rundeckd
+        state: started
+        enabled: yes

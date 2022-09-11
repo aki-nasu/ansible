@@ -4,3 +4,7 @@
 ansible_user=aki-nasu
 ansible_ssh_private_key_file="~/.ssh/id_rsa"
 [rundeck_server]
+127.0.0.1
+[rundeck_server:vars]
+ansible_user=t_t_akiyoshi2
+ansible_ssh_private_key_file="~/.ssh/google_compute_engine"
