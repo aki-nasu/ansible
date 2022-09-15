@@ -1,0 +1,28 @@
+- name: setup cockpit server
+  hosts: cockpit_server
+  become: true
+  tasks:
+    - name: install google-authenticator
+      apt:
+        name: libpam-google-authenticator
+        update_cache: yes
+    - name: configure google-authenticator
+      shell:
+        cmd: 'google-authenticator -t -D -f -r 3 -R 30 -w 3'
+    - name: copy /etc/pam.d/sshd
+      copy:
+        src: ./google-authenticator/sshd
+        dest: /etc/pam.d/sshd
+    - name: copy /etc/ssh/sshd_config
+      copy:
+        src: ./google-authenticator/sshd_config
+        dest: /etc/ssh/sshd_config
+    - name: install cockpit
+      apt:
+        name: cockpit
+        update_cache: yes
+    - name: cockpit service start
+      systemd:
+        name: cockpit
+        state: started
+        enabled: yes
