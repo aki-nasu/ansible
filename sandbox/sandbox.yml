@@ -1,0 +1,5 @@
+- name: sandbox procedure
+  hosts: web_servers
+  tasks:
+    - name: pre1-2
+      shell: uname -a;whoami > sandbox.txt; echo {{ web_server_port }} >> sandbox.txt
